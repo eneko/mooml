@@ -1,11 +1,11 @@
 ﻿/**
-* @class MooML
+* @class Mooml
 * @author Eneko Alonso (http://enekoalonso.com)
 * Based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 * MooML is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
 */
 
-MooML = new (new Class({
+Mooml = new (new Class({
 	templates: {},
 	engine: {
 		nodes: []
