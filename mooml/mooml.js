@@ -41,7 +41,7 @@ MooML = new (new Class({
 			return node.parentNode === null;
 		}));
 		this.engine.nodes.length = 0;
-		return elements;
+		return (elements.length > 1) ? elements : elements.shift();
 	},
 
 	generateTags: function() {
@@ -63,7 +63,7 @@ MooML = new (new Class({
 				this.nodes.push(el);
 				return el;
 			}
-		}.bind(this));
+		} .bind(this));
 	}
 
 }))();
