@@ -35,12 +35,16 @@ Mooml = new (new Class({
 	},
 
 	evaluate: function(code, data) {
-		with (this.engine) eval('(' + code + ')(data)');
-		//console.log('this.engine.nodes: ', this.engine.nodes);
-		var elements = new Elements(this.engine.nodes.filter(function(node) {
-			return node.parentNode === null;
-		}));
-		this.engine.nodes.length = 0;
+		var elements = [];
+		$splat(data || {}).each(function(params) {
+			with (this.engine) {
+				eval('(' + code + ')(params)');
+			}
+			elements.extend(new Elements(this.engine.nodes.filter(function(node) {
+				return node.parentNode === null;
+			})));
+			this.engine.nodes.length = 0;
+		} .bind(this));
 		return (elements.length > 1) ? elements : elements.shift();
 	},
 
