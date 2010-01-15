@@ -1,6 +1,7 @@
 ﻿/**
 * @class Mooml
 * @author Eneko Alonso (http://enekoalonso.com)
+* @version 1.0.3
 * Based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 * MooML is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
 */
