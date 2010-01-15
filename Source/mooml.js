@@ -1,10 +1,21 @@
-﻿/**
-* @class Mooml
-* @author Eneko Alonso (http://enekoalonso.com)
-* @version 1.0.3
-* @url http://github.com/eneko/mooml
-* Based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
-* MooML is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
+﻿/*
+---
+description: Mooml is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
+version: 1.0.3
+url: http://github.com/eneko/mooml
+Based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
+
+license: MIT-style
+
+authors:
+- Eneko Alonso (http://enekoalonso.com)
+
+requires:
+- core/1.2.4:Class
+- core/1.2.4:Elements
+- core/1.2.4:Array
+
+...
 */
 
 Mooml = new (new Class({
@@ -33,15 +44,15 @@ Mooml = new (new Class({
 	},
 
 	render: function(name, data) {
+		//console.log('Mooml: rendering template: ', name);
 		return this.templates[name](data);
 	},
 
 	evaluate: function(code, data) {
 		var elements = [];
 		$splat(data || {}).each(function(params) {
-			with (this.engine) {
-				eval('(' + code + ')(params)');
-			}
+			with (this.engine) eval('(' + code + ')(params)');
+			//console.log('Mooml: nodes:', this.engine.nodes);
 			elements.extend(new Elements(this.engine.nodes.filter(function(node) {
 				return node.parentNode === null;
 			})));
@@ -53,10 +64,10 @@ Mooml = new (new Class({
 	generateTags: function() {
 		this.tags.each(function(tag) {
 			this.engine[tag] = function() {
-				//console.log('Rendering tag: ', tag);
+				//console.log('Mooml: rendering tag: ', tag);
 				var el = new Element(tag);
 				$A(arguments).each(function(argument, index) {
-					//console.log('argument', index, ': ', argument, $type(argument));
+					//console.log('Mooml: argument', index, ': ', argument, '(', $type(argument), ')');
 					switch ($type(argument)) {
 						case "array":
 						case "element":
