@@ -62,7 +62,7 @@ Mooml = new (new Class({
 						case "collection": el.adopt(argument); break;
 						case "string": el.appendText(argument); break;
 						case "object": el.set(argument); break;
-						default: throw ("MooML: Invalid argument:" + argument.toString());
+						default: return; // ignore
 					}
 				});
 				this.nodes.push(el);
