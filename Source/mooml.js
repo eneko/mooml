@@ -1,7 +1,7 @@
 ﻿/*
 ---
 description: Mooml is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
-version: 1.0.5
+version: 1.0.6
 url: http://github.com/eneko/mooml
 jaml: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 
