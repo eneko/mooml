@@ -1,7 +1,7 @@
 ﻿name: Mooml
 author: enekoalonso
-category: Interface
-tags: [template, html, dom]
+category: Native
+tags: [template, html, dom, element]
 #docs: http://url.to.docs
 #demo: http://url.to.demo
-current: 1.0.3
+#current: 1.0.4
