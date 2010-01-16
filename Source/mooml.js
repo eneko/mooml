@@ -1,7 +1,7 @@
 ﻿/*
 ---
 description: Mooml is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
-version: 1.0.4
+version: 1.0.5
 url: http://github.com/eneko/mooml
 Based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 
@@ -21,7 +21,7 @@ requires:
 Mooml = new (new Class({
 	templates: {},
 	engine: {
-		nodes: []
+		nodeStack: []
 	},
 	tags: [
 		"html", "head", "body", "script", "meta", "title", "link", "script",
@@ -44,20 +44,27 @@ Mooml = new (new Class({
 	},
 
 	render: function(name, data) {
-		//console.log('Mooml: rendering template: ', name);
-		return this.templates[name](data);
+		//console.log('Mooml: >>> rendering template: ', name);
+		var result = this.templates[name](data);
+		//console.log('Mooml: <<< template rendered: ', name, result);
+		return result;
 	},
 
 	evaluate: function(code, data) {
 		var elements = [];
+		var nodes = [];
+		this.engine.nodeStack.push(nodes);
+
 		$splat(data || {}).each(function(params) {
 			with (this.engine) eval('(' + code + ')(params)');
-			//console.log('Mooml: nodes:', this.engine.nodes);
-			elements.extend(new Elements(this.engine.nodes.filter(function(node) {
+			//console.log('Mooml: nodes:', nodes, nodes.length, this.engine.nodeStack.length);
+			elements.extend(new Elements(nodes.filter(function(node) {
 				return node.parentNode === null;
 			})));
-			this.engine.nodes.length = 0;
+			nodes.empty();
 		} .bind(this));
+
+		this.engine.nodeStack.pop();
 		return (elements.length > 1) ? elements : elements.shift();
 	},
 
@@ -77,7 +84,7 @@ Mooml = new (new Class({
 						default: return; // ignore
 					}
 				});
-				this.nodes.push(el);
+				this.nodeStack.getLast().push(el);
 				return el;
 			}
 		} .bind(this));
