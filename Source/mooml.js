@@ -72,26 +72,20 @@ Mooml = new (new Class({
 	 * @param {Object|Array} data Optional data object or array of objects
 	 */
 	evaluate: function(code, data) {
-		// List of elements returned by evaluating the template
 		var elements = [];
-
-		// All elements generated during the evaluation of the template
 		var nodes = [];
 
 		// Add a new node list to the stack (allows nested templates)
 		this.engine.nodeStack.push(nodes);
 
-		// If data is an array, render the template X times
-		// If data is not an array or is not present, render the template once
+		// If data is an array, render the template X times, otherwise render the template once
 		$splat(data || {}).each(function(params) {
 
 			// Evaluate the whole template code in the scope of the engine
 			with (this.engine) {
 				eval('(' + code + ')(params)');
 			}
-			//console.log('Mooml: nodes:', nodes, nodes.length, this.engine.nodeStack.length);
 
-			// Save only the root elements (other elements will be child of those)
 			elements.extend(new Elements(nodes.filter(function(node) {
 				return node.parentNode === null;
 			})));
@@ -102,7 +96,6 @@ Mooml = new (new Class({
 		// Remove the node list from the stack
 		this.engine.nodeStack.pop();
 
-		// If template has multiple root elements, return an array, otherwise return an element
 		return (elements.length > 1) ? elements : elements.shift();
 	},
 
@@ -118,53 +111,34 @@ Mooml = new (new Class({
 		// For every html, generate a function on the engine object (div(), span(), p(), etc).
 		this.tags.each(function(tag) {
 
-			// If user calls initEngine, avoid generating existing functions
 			if (this.engine[tag]) return;
-
 			this.engine[tag] = function() {
-				//console.log('Mooml: rendering tag: ', tag);
 
 				// Get the node list for the current template being rendered
 				var nodes = this.nodeStack.getLast();
-
-				// Create the element for the current tag
 				var el = new Element(tag);
-
 
 				// For each argument passed to the tag function, check type and proceed
 				$each(arguments, function(argument, index) {
-
-					//console.log('Mooml: argument', index, ': ', argument, '(', $type(argument), ')');
 					switch ($type(argument)) {
-
-						// elements or arrays of elements are adopted as children of the current element
 						case "array":
 						case "element":
 						case "collection": {
 							el.adopt(argument);
 							break;
 						}
-
-						// strings are adopted as html
 						case "string": {
 							el.getChildren().each(function(child) { nodes.erase(child) });
 							el.set('html', el.get('html') + argument);
 							break;
 						}
-
-						// object arguments are options passed to the element (attributes, events, styles...)
 						case "object": {
 							el.set(argument); 
 							break;
 						}
-
-						// other arguments types are ignored
 					}
-
 				});
 
-
-				// Add the element to the node list
 				nodes.push(el);
 				return el;
 			}
