@@ -74,28 +74,17 @@ Mooml = new (new Class({
 	evaluate: function(code, data) {
 		var elements = [];
 		var nodes = [];
-
-		// Add a new node list to the stack (allows nested templates)
 		this.engine.nodeStack.push(nodes);
 
-		// If data is an array, render the template X times, otherwise render the template once
 		$splat(data || {}).each(function(params) {
-
-			// Evaluate the whole template code in the scope of the engine
-			with (this.engine) {
-				eval('(' + code + ')(params)');
-			}
-
+			with (this.engine) eval('(' + code + ')(params)');
 			elements.extend(new Elements(nodes.filter(function(node) {
-				return node.parentNode === null;
+				return node.getParent() === null;
 			})));
 			nodes.empty();
-
 		}.bind(this));
 
-		// Remove the node list from the stack
 		this.engine.nodeStack.pop();
-
 		return (elements.length > 1) ? elements : elements.shift();
 	},
 
@@ -107,18 +96,13 @@ Mooml = new (new Class({
 	 * initEngine can be called by the user in case of adding additional tags.
 	 */
 	initEngine: function() {
-
-		// For every html, generate a function on the engine object (div(), span(), p(), etc).
 		this.tags.each(function(tag) {
-
 			if (this.engine[tag]) return;
-			this.engine[tag] = function() {
 
-				// Get the node list for the current template being rendered
+			this.engine[tag] = function() {
 				var nodes = this.nodeStack.getLast();
 				var el = new Element(tag);
 
-				// For each argument passed to the tag function, check type and proceed
 				$each(arguments, function(argument, index) {
 					switch ($type(argument)) {
 						case "array":
