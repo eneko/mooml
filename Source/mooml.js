@@ -23,10 +23,8 @@ requires:
 Mooml = new (new Class({
 
 	templates: {},
-
-	engine: {
-		nodeStack: []
-	},
+	engine: { nodeStack: [] },
+	globalized: false,
 
 	tags: [
 		"html", "head", "body", "script", "meta", "title", "link", "script",
@@ -97,10 +95,9 @@ Mooml = new (new Class({
 	 */
 	initEngine: function() {
 		this.tags.each(function(tag) {
-			if (this.engine[tag]) return;
-
-			this.engine[tag] = function() {
-				var nodes = this.nodeStack.getLast();
+			var owner = (this.globalized) ? window : this.engine;
+			owner[tag] = function() {
+				if (!Mooml.globalized) var nodes = this.nodeStack.getLast();
 				var el = new Element(tag);
 
 				$each(arguments, function(argument, index) {
@@ -112,22 +109,31 @@ Mooml = new (new Class({
 							break;
 						}
 						case "string": {
-							el.getChildren().each(function(child) { nodes.erase(child) });
+							if (!Mooml.globalized) el.getChildren().each(function(child) { nodes.erase(child) });
 							el.set('html', el.get('html') + argument);
 							break;
 						}
 						case "object": {
-							el.set(argument); 
+							if (index == 0) el.set(argument);
 							break;
 						}
 					}
 				});
 
-				nodes.push(el);
+				if (!Mooml.globalized) nodes.push(el);
 				return el;
 			}
-
 		}.bind(this));
+	},
+
+	/**
+	 * Makes all template functions available in the global scope of the window object.
+	 * This will polute the global scope creating a new function for every html tag.
+	 * Can be very handy for some websites. Use with discrection.
+	 */
+	globalize: function() {
+		this.globalized = true;
+		this.initEngine();
 	}
 
 }))();
