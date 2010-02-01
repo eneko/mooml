@@ -56,6 +56,52 @@ Will generate:
 	</div>
 
 
+Evaluating templates on the fly
+-----------------
+
+With Mooml you can evaluate templates without having to register/save them for later reuse.
+
+	Mooml.evaluate(function() {
+		div(
+			p(a({ href: 'http://example.com' }, 'click here'))
+		);
+	});
+
+Will create the html elements:
+
+	<div>
+		<p><a href="http://example.com">click here</a></p>
+	</div>
+
+
+Globalizing Mooml
+-----------------
+
+Since version 1.0.9, Mooml includes a new feature: globalize. It maybe handy for some websites to globalize all the Mooml template functions (div, a, p, span...) to the window object scope, so they can be used anywhere in the code without the need of defining or evaluating a template.
+
+For example, in normal Mootools code we would create a div like this:
+
+	var mydiv = new Element('div', options); // options can have attributes, css, events and more
+
+With Mooml.globalize we can do this:
+
+	Mooml.globalize(); // Only need to call this once
+	var mydiv = div(options); // Same options as Mootools new Element()
+
+Mooml globalized functions can also have nested elements, which makes very easy to create dom elements:
+
+	var mydiv = div(options, 
+		p('First paragraph'),
+		p('Second paragraph'),
+		div('Nested div:',
+			span('div content')
+		),
+		Mooml.render('nested_template'),
+		'Some <b>inline</b> <em>html</em> too'
+	);
+
+Please be aware that using Mooml.globalize() feature will pollute the window object scope, overriding any methods with the same name and/or possibly conflicting with other javascript libraries.
+
 Differences between Mooml and Jaml
 -----------------
 
@@ -64,4 +110,3 @@ Mooml is based in Jaml, but it has some differences:
 * Mooml code takes advantage of Mootools using classes, elements, etc
 * Mooml does not return text as Jaml. Instead, it creates the dom elements in the template
 * Mooml alows passing css in json format and events, like Mootools Element.set function does
-
