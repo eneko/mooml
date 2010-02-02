@@ -4,6 +4,8 @@
 Mooml is a port of Jaml. It let's you build html from Javascript using a very nice and clean templating system.
 **Mooml creates the dom elements** in the template, returning a single element if the template has one root or an array of elements if there are multiple roots.
 
+![Screenshot](http://github.com/eneko/mooml/raw/master/screenshot.jpg)
+
 How to use
 ----------
 
