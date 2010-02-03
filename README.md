@@ -104,6 +104,25 @@ Mooml globalized functions can also have nested elements, which makes very easy 
 
 Please be aware that using Mooml.globalize() feature will pollute the window object scope, overriding any methods with the same name and/or possibly conflicting with other javascript libraries.
 
+Not want to globalize? Still can run Mooml inline
+-----------------
+
+With version 1.0.10, Mooml can be used directly inline to create dom elements:
+
+	var mydiv = Mooml.engine.div({id:'mydiv'}, 'Inline div');
+
+Better yet, you can build elements with children like this:
+
+	var el;
+	with (Mooml.engine) {
+		el = div({id:'mydiv',
+			p('one paragraph'),
+			p('another paragraph'),
+			input({name:'email', type:'text', defaultValue:'test@example.com'})
+		);
+	}
+
+
 Differences between Mooml and Jaml
 -----------------
 
