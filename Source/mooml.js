@@ -109,7 +109,7 @@ Mooml = new (new Class({
 							break;
 						}
 						case "string": {
-							if (!Mooml.globalized) el.getChildren().each(function(child) { nodes.erase(child) });
+							if (!Mooml.globalized && nodes) el.getChildren().each(function(child) { nodes.erase(child) });
 							el.set('html', el.get('html') + argument);
 							break;
 						}
@@ -120,7 +120,7 @@ Mooml = new (new Class({
 					}
 				});
 
-				if (!Mooml.globalized) nodes.push(el);
+				if (!Mooml.globalized && nodes) nodes.push(el);
 				return el;
 			}
 		}.bind(this));
