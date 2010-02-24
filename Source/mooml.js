@@ -113,6 +113,10 @@ Mooml = new (new Class({
 							el.set('html', el.get('html') + argument);
 							break;
 						}
+						case "number": {
+							el.appendText(argument.toString());
+							break;
+						},
 						case "object": {
 							if (index == 0) el.set(argument);
 							break;
