@@ -1,16 +1,19 @@
 ﻿/*
 ---
 script: mooml.js
-description: Mooml is a Mootools based version of Jaml which makes HTML generation easy and pleasurable.
-jaml: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
-url: http://github.com/eneko/mooml
+version: 1.0.12
+description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
+download: http://mootools.net/forge/p/mooml
+source: http://github.com/eneko/mooml
+htmltags: http://www.w3schools.com/html5/html5_reference.asp
+credits: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 
 authors:
 - Eneko Alonso (http://enekoalonso.com)
 
 provides:
-- mooml
+- Mooml
 
 requires:
 - core/1.2.4:Class
@@ -20,29 +23,39 @@ requires:
 ...
 */
 
-Mooml = new (new Class({
+Mooml = {
 
 	templates: {},
 	engine: { nodeStack: [] },
 	globalized: false,
 
 	tags: [
-		"html", "head", "body", "script", "meta", "title", "link", "script",
-		"div", "p", "span", "a", "img", "br", "hr",
-		"table", "tr", "th", "td", "thead", "tbody",
-		"ul", "ol", "li",
-		"dl", "dt", "dd",
-		"h1", "h2", "h3", "h4", "h5", "h6", "h7",
-		"form", "input", "label"
+		"a", "abbr", "address", "area", "article", "aside", "audio",
+		"b", "base", "bdo", "blockquote", "body", "br", "button",
+		"canvas", "caption", "cite", "col", "colgroup", "command",
+		"datalist", "dd", "del", "details", "dialog", "dfn", "div", "dl", "dt",
+		"em", "embed",
+		"fieldset", "figure",
+		"footer", "form",
+		"h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html",
+		"i", "iframe", "img", "input", "ins",
+		"keygen", "kbd",
+		"label", "legend", "li", "link",
+		"map", "mark", "menu", "meta", "meter",
+		"nav", "noscript",
+		"object", "ol", "optgroup", "option", "output",
+		"p", "param", "pre", "progress",
+		"q",
+		"rp", "rt", "ruby",
+		"samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup",
+		"table", "tbody", "td", "textarea", "tfoot", "th", "thead", "time", "title", "tr",
+		"ul",
+		"var", "video",
+		// Deprecated in HTML 5
+		"acronym", "applet", "basefont", "big", "center", "dir", "font", "frame", "frameset", "noframes", "s", "strike", "tt", "u", "xmp"
+		// Not supported tags
+		// "code"
 	],
-
-	/**
-	 * @constructor
-	 * Initializes the engine
-	 */
-	initialize: function() {
-		this.initEngine();
-	},
 
 	/**
 	 * Registers a new template for later use
@@ -97,7 +110,7 @@ Mooml = new (new Class({
 		this.tags.each(function(tag) {
 			var owner = (this.globalized) ? window : this.engine;
 			owner[tag] = function() {
-				if (!Mooml.globalized) var nodes = this.nodeStack.getLast();
+				var nodes = (Mooml.globalized)? null : this.nodeStack.getLast();
 				var el = new Element(tag);
 
 				$each(arguments, function(argument, index) {
@@ -109,14 +122,16 @@ Mooml = new (new Class({
 							break;
 						}
 						case "string": {
-							if (!Mooml.globalized && nodes) el.getChildren().each(function(child) { nodes.erase(child) });
+							if (!Mooml.globalized && nodes) {
+								el.getChildren().each(function(child) { nodes.erase(child) });
+							}
 							el.set('html', el.get('html') + argument);
 							break;
 						}
 						case "number": {
 							el.appendText(argument.toString());
 							break;
-						},
+						}
 						case "object": {
 							if (index == 0) el.set(argument);
 							break;
@@ -140,4 +155,6 @@ Mooml = new (new Class({
 		this.initEngine();
 	}
 
-}))();
+}
+
+Mooml.initEngine();
