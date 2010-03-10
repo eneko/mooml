@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.0.12
+version: 1.0.13
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -87,8 +87,8 @@ Mooml = {
 		var nodes = [];
 		this.engine.nodeStack.push(nodes);
 
-		$splat(data || {}).each(function(params) {
-			with (this.engine) eval('(' + code + ')(params)');
+		$splat(data || {}).each(function(params, index) {
+			with (this.engine) eval('(' + code + ')(params, index)');
 			elements.extend(new Elements(nodes.filter(function(node) {
 				return node.getParent() === null;
 			})));
