@@ -1,0 +1,103 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>Mooml</title>
+	<style>
+		body { font: 12px Helvetica, Arial; background: #F4F5F5; }
+	</style>
+</head>
+<body>
+	<h1>Mooml Demo</h1>
+	<h2>What is Mooml?</h2>
+	<p>Mooml is a javascript templating engine that let's you build html from Javascript using a very nice and clean syntax taking advantage of the power of Mootools.
+	Mooml creates the actual dom elements in the template, returning a single element if the template has one root or an array of elements if the template contains multiple roots.</p>
+	<h3>Mooml links</h3>
+	<ul>
+		<li>Mooml in Github: <a href="http://github.com/eneko/mooml">http://github.com/eneko/mooml</a></li>
+		<li>Mooml plugin in Mootools Forge: <a href="http://mootools.net/forge/p/mooml">http://mootools.net/forge/p/mooml</a></li>
+		<li>Mooml related posts: <a href="http://dev.enekoalonso.com/tag/mooml/">http://dev.enekoalonso.com/tag/mooml/</a></li>
+	</ul>
+
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+	<script type="text/javascript" src="../Source/mooml.js"></script>
+	<script type="text/javascript">
+
+		function searchTwitter(text) {
+			Mooml.engine.tags.script({
+				type: 'text/javascript',
+				src: 'http://search.twitter.com/search.json?q={text}&show_user=true&callback=renderData'.substitute({
+					text: encodeURIComponent(text)
+				})
+			}).inject(document.head);
+		}
+
+		function renderData(data) {
+			$('twitter-search-list').empty().adopt(Mooml.render('twitter-search-item', data.results));
+		}
+
+		Mooml.register('twitter-search-item', function(entry, index) {
+			li({ id: "tweet-" + entry.id, styles: {
+					listStyle: 'none',
+					background: index & 1 ? '#fff' : '#ddd',
+					padding: 5
+				}},
+				img({ src: entry.profile_image_url, alt: entry.from_user, styles: { width: 48, height: 48, marginRight: 5, border: 'solid 1px #999', padding: 1} }),
+				span(a({ href: 'http://twitter.com/' + entry.from_user, target: '_blank' }, entry.from_user)),
+				p({ styles: { margin: 0} }, entry.text)
+			);
+		});
+
+		var twitterTemplate = new Mooml.Template('twitter-search', function() {
+			h2('Twitter live search demo');
+			p('Search any text in Twitter in real-time from Javascript. No ajax requests are made other than the one to the Twitter api.');
+			var searchBox = input({
+				type: 'text',
+				value: 'mootools'
+			});
+			input({
+				type: 'button',
+				value: 'Search Twitter',
+				events: {
+					click: function() {
+						searchTwitter(searchBox.get('value'));
+					}
+				}
+			});
+			ul({ id: 'twitter-search-list', styles: {
+				font: '11px Arial',
+				width: 300,
+				padding: 0,
+				border: 'solid 1px #ccc'
+			}});
+		});
+
+		$(document.body).adopt(twitterTemplate.render('twitter-search'));
+		searchTwitter('mootools');
+
+		var Dog = new Class({
+			Implements: [Options, Mooml.Templates],
+			options: {
+				bark: 'Bark! Bark!'
+			},
+			initialize: function(options) {
+				this.setOptions(options);
+				this.register('dog', function(bark) {
+					div({ 'class': 'dog'}, bark);
+				});
+			},
+			toElement: function() {
+				return this.render('dog', this.options.bark);
+			}
+		});
+
+		var body = $(document.body);
+		body.grab(Mooml.engine.tags.h2('Dog Demo'));
+		body.grab(new Dog());
+		body.grab(new Dog({ bark: 'Woof! Woof!' }));
+		body.grab(new Dog({ bark: 'Arf!' }));
+
+	</script>
+</body>
+</html>

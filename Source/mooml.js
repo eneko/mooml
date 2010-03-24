@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.0.13
+version: 1.1
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -11,9 +11,13 @@ credits: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 
 authors:
 - Eneko Alonso (http://enekoalonso.com)
+- Tim Schmidt (function and number argument types)
+- Josh Cohen (node stacks for nested templates)
 
 provides:
 - Mooml
+- Mooml.Template
+- Mooml.Templates
 
 requires:
 - core/1.2.4:Class
@@ -23,13 +27,13 @@ requires:
 ...
 */
 
-Mooml = {
+var Mooml = {
 
+	version: '1.1',
 	templates: {},
-	engine: { nodeStack: [] },
-	globalized: false,
+	engine: { callstack: [], tags: {} },
 
-	tags: [
+	htmlTags: [
 		"a", "abbr", "address", "area", "article", "aside", "audio",
 		"b", "base", "bdo", "blockquote", "body", "br", "button",
 		"canvas", "caption", "cite", "col", "colgroup", "command",
@@ -58,44 +62,27 @@ Mooml = {
 	],
 
 	/**
-	 * Registers a new template for later use
-	 * @param {String} name The name of the template
-	 * @param {Function} code The code function of the template
-	 */
-	register: function(name, code) {
-		this.templates[name] = function(data) {
-			return this.evaluate(code, data);
-		}.bind(this);
-	},
-
-	/**
-	 * Evaluates a registered template
-	 * @param {String} name The name of the template to evaluate
+	 * Evaluates a Mooml template supporting nested templates
+	 * @param {Mooml.Template} template The template function
 	 * @param {Object|Array} data Optional data object or array of objects
 	 */
-	render: function(name, data) {
-		return this.templates[name](data);
-	},
-
-	/**
-	 * Evaluates a Mooml template
-	 * @param {function} code The code function of the template
-	 * @param {Object|Array} data Optional data object or array of objects
-	 */
-	evaluate: function(code, data) {
+	evaluate: function(template, data) {
 		var elements = [];
-		var nodes = [];
-		this.engine.nodeStack.push(nodes);
+		this.engine.callstack.push(template);
 
 		$splat(data || {}).each(function(params, index) {
-			with (this.engine) eval('(' + code + ')(params, index)');
-			elements.extend(new Elements(nodes.filter(function(node) {
+			template.code(params, index);
+			elements.extend(template.nodes.filter(function(node) {
 				return node.getParent() === null;
-			})));
-			nodes.empty();
-		}.bind(this));
+			}));
+			template.nodes.empty();
+		});
 
-		this.engine.nodeStack.pop();
+		this.engine.callstack.pop();
+		if (this.engine.callstack.length && template.saveElementRefs) {
+			$extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
+		}
+
 		return (elements.length > 1) ? elements : elements.shift();
 	},
 
@@ -104,16 +91,17 @@ Mooml = {
 	 * tag that can be used on the template.
 	 * Template tag functions can receive options for the element, child 
 	 * elements and html code as parameters.
-	 * initEngine can be called by the user in case of adding additional tags.
+	 * initialize can be called by the user in case of adding additional tags.
 	 */
 	initEngine: function() {
-		this.tags.each(function(tag) {
-			var owner = (this.globalized) ? window : this.engine;
-			owner[tag] = function() {
-				var nodes = (Mooml.globalized)? null : this.nodeStack.getLast();
+		this.htmlTags.each(function(tag) {
+			Mooml.engine.tags[tag] = function() {
+				var template = Mooml.engine.callstack.getLast();
 				var el = new Element(tag);
 
 				$each(arguments, function(argument, index) {
+					if ($type(argument) === "function") argument = argument();
+
 					switch ($type(argument)) {
 						case "array":
 						case "element":
@@ -122,8 +110,10 @@ Mooml = {
 							break;
 						}
 						case "string": {
-							if (!Mooml.globalized && nodes) {
-								el.getChildren().each(function(child) { nodes.erase(child) });
+							if (template) {
+								el.getChildren().each(function(child) {
+									template.nodes.erase(child);
+								});
 							}
 							el.set('html', el.get('html') + argument);
 							break;
@@ -133,28 +123,89 @@ Mooml = {
 							break;
 						}
 						case "object": {
-							if (index == 0) el.set(argument);
+							if (index === 0) {
+								if (template && template.saveElementRefs && argument.id) {
+									template.elementRefs[argument.id] = el;
+								}
+								el.set(argument);
+							}
 							break;
 						}
 					}
 				});
 
-				if (!Mooml.globalized && nodes) nodes.push(el);
+				if (template) template.nodes.push(el);
 				return el;
 			}
-		}.bind(this));
+		});
 	},
 
 	/**
-	 * Makes all template functions available in the global scope of the window object.
-	 * This will polute the global scope creating a new function for every html tag.
-	 * Can be very handy for some websites. Use with discrection.
+	 * Prepares a template function so it can be called directly without using eval
+	 * This function parses the template replacing tag functions by Mooml.engine.tag calls
+	 * @param {function} code The template function to prepare
+	 * Protected: this method cannot be called from outside Mooml class
 	 */
-	globalize: function() {
-		this.globalized = true;
-		this.initEngine();
+	prepare: function(code) {
+		var codeStr = code.toString();
+		var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
+		var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
+		return new Function(args, 'with (Mooml.engine.tags) {' + body + '}');
+	}
+
+};
+
+/**
+ * Template class for Mooml templates
+ */
+Mooml.Template = new Class({
+	nodes: [],
+
+	initialize: function(name, code, options) {
+		this.saveElementRefs = (options && options.saveElementRefs === true)? true : false;
+		this.elementRefs = (options && options.elementRefs && typeof(options.elementRefs) === "object")? options.elementRefs : {};
+		this.name = name;
+		this.code = Mooml.prepare(code);
+	},
+
+	render: function(data) {
+		return Mooml.evaluate(this, data);
+	}
+});
+
+
+/**
+ * Mixin for implemenation in Mootools classes: Implements: [Mooml.Templates, Options, ...]
+ */
+Mooml.Templates = {
+	templates: {},
+
+	/**
+	 * Registers a new template for later use
+	 * @param {String} name The name of the template
+	 * @param {Function} code The code function of the template
+	 */
+	register: function(name, code, options) {
+		this.templates[name] = new Mooml.Template(name, code, options);
+	},
+
+	/**
+	 * Evaluates a registered template
+	 * @param {String} name The name of the template to evaluate
+	 * @param {Object|Array} data Optional data object or array of objects
+	 */
+	render: function(name, data) {
+		var template = this.templates[name];
+		return (template)? template.render(data) : null;
 	}
 
 }
+
+
+/**
+ * Implement Mooml.Templates into Mooml
+ */
+$extend(Mooml, Mooml.Templates);
+
 
 Mooml.initEngine();

@@ -1,8 +1,8 @@
 ﻿Mooml
 ===========
 
-Mooml is a port of Jaml. It let's you build html from Javascript using a very nice and clean templating system.
-**Mooml creates the dom elements** in the template, returning a single element if the template has one root or an array of elements if there are multiple roots.
+Mooml is a javascript templating engine that let's you build html from Javascript using a very nice and clean syntax taking advantage of the power of Mootools.
+**Mooml creates the actual dom elements** in the template, returning a single element if the template has one root or an array of elements if there are multiple roots.
 
 ![Screenshot](http://github.com/eneko/mooml/raw/master/screenshot.jpg)
 
@@ -61,19 +61,7 @@ Will generate:
 Evaluating templates on the fly
 -----------------
 
-With Mooml you can evaluate templates without having to register/save them for later reuse.
-
-	Mooml.evaluate(function() {
-		div(
-			p(a({ href: 'http://example.com' }, 'click here'))
-		);
-	});
-
-Will create the html elements:
-
-	<div>
-		<p><a href="http://example.com">click here</a></p>
-	</div>
+Evaluating templates on the fly (with Mooml.evaluate) is no longer supported in Mooml 1.1
 
 
 Globalizing Mooml
@@ -104,7 +92,7 @@ Mooml globalized functions can also have nested elements, which makes very easy 
 
 Please be aware that using Mooml.globalize() feature will pollute the window object scope, overriding any methods with the same name and/or possibly conflicting with other javascript libraries.
 
-Not want to globalize? Still can run Mooml inline
+Do not want to globalize? Still can run Mooml inline
 -----------------
 
 With version 1.0.10, Mooml can be used directly inline to create dom elements:
