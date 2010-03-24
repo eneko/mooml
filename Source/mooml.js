@@ -7,12 +7,15 @@ license: MIT-style
 download: http://mootools.net/forge/p/mooml
 source: http://github.com/eneko/mooml
 htmltags: http://www.w3schools.com/html5/html5_reference.asp
-credits: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
 
 authors:
-- Eneko Alonso (http://enekoalonso.com)
-- Tim Schmidt (function and number argument types)
-- Josh Cohen (node stacks for nested templates)
+- Eneko Alonso: (http://enekoalonso.com)
+
+credits:
+- Ed Spencer: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
+- Tim Schmidt: contributed with function and number argument types
+- Josh Cohen: helped with node stacks for nested templates
+- Vasili Sviridov: for the mixin idea
 
 provides:
 - Mooml
