@@ -19,7 +19,17 @@ Creating Mooml templates is very easy:
 		);
 	});
 
-This template will generate the following HTML structure, creating the dom elements for you:
+Or as an alternative:
+
+	var template = new Mooml.Template('mytemplate', function() {
+		div({id: 'mydivid'},
+			h2('Title'),
+			p('Lorem Ipsum'),
+			p(a({ href: 'http://example.com' }, 'click here'))
+		);
+	});
+
+Both of the avobe templates will generate the following HTML structure, creating the dom elements for you. The first method will register the template globally while the second one wont.:
 
 	<div id="mydivid">
 		<h2>Title</h2>
@@ -30,6 +40,7 @@ This template will generate the following HTML structure, creating the dom eleme
 To render the template and generate the dom elements:
 
 	var el = Mooml.render('mytemplate');
+	var el = template.render();
 
 Passing variables to a template can be done easily too:
 
@@ -40,7 +51,12 @@ Passing variables to a template can be done easily too:
 	});
 	var el = Mooml.render('mytemplate', { myDivId: 'newid' });
 
-Finally, we can render a template N times by passing an array as argument to the render method:
+
+Rendering template arrays
+-----------------
+
+Mooml allows rendering template arrays. This is, if we pass an array of data to the render function, it will render the template N times.
+This is very useful when rendering list elements, table rows, or any other repetitive html layout:
 
 	var elements = Mooml.render('mytemplate', [
 		{ myDivId: 'div1' },
@@ -50,32 +66,32 @@ Finally, we can render a template N times by passing an array as argument to the
 
 Will generate:
 
-	<div id="div1">
-	</div>
-	<div id="div2">
-	</div>
-	<div id="div3">
-	</div>
+	<div id="div1"></div>
+	<div id="div2"></div>
+	<div id="div3"></div>
 
 
 Evaluating templates on the fly
 -----------------
 
-Evaluating templates on the fly (with Mooml.evaluate) is no longer supported in Mooml 1.1
+Evaluating templates on the fly can be done by creating a template with the Mooml.Template constructor, although the evaluate step is redundant since the template it self contains a render function:
+
+	var template = new Mooml.Template('mytemplate', function() {
+		div('Template on the fly');
+	});
+	// Both of these calls return the same result:
+	Mooml.evaluate(template); // returns <div>Template on the fly</div>
+	template.render(); // returns <div>Template on the fly</div>
 
 
 Globalizing Mooml
 -----------------
 
-Since version 1.0.9, Mooml includes a new feature: globalize. It maybe handy for some websites to globalize all the Mooml template functions (div, a, p, span...) to the window object scope, so they can be used anywhere in the code without the need of defining or evaluating a template.
+Since version 1.1, if you whish to globalize Mooml you need to download and include mooml-globalize.js in your project, after including mooml.js.
+This will make all Mooml engine template tag functions available at the window scope.
 
-For example, in normal Mootools code we would create a div like this:
+With mooml-globalize.js we can do this:
 
-	var mydiv = new Element('div', options); // options can have attributes, css, events and more
-
-With Mooml.globalize we can do this:
-
-	Mooml.globalize(); // Only need to call this once
 	var mydiv = div(options); // Same options as Mootools new Element()
 
 Mooml globalized functions can also have nested elements, which makes very easy to create dom elements:
@@ -90,19 +106,20 @@ Mooml globalized functions can also have nested elements, which makes very easy 
 		'Some <b>inline</b> <em>html</em> too'
 	);
 
-Please be aware that using Mooml.globalize() feature will pollute the window object scope, overriding any methods with the same name and/or possibly conflicting with other javascript libraries.
+Please be aware that using Mooml globalized feature will pollute the window object scope, overriding any methods with the same name and/or possibly conflicting with other javascript libraries.
+
 
 Do not want to globalize? Still can run Mooml inline
 -----------------
 
-With version 1.0.10, Mooml can be used directly inline to create dom elements:
+Mooml can be used directly inline to create dom elements:
 
-	var mydiv = Mooml.engine.div({id:'mydiv'}, 'Inline div');
+	var mydiv = Mooml.engine.tags.div({id:'mydiv'}, 'Inline div');
 
 Better yet, you can build elements with children like this:
 
 	var el;
-	with (Mooml.engine) {
+	with (Mooml.engine.tags) {
 		el = div({id:'mydiv',
 			p('one paragraph'),
 			p('another paragraph'),
@@ -119,3 +136,4 @@ Mooml is based in Jaml, but it has some differences:
 * Mooml code takes advantage of Mootools using classes, elements, etc
 * Mooml does not return text as Jaml. Instead, it creates the dom elements in the template
 * Mooml alows passing css in json format and events, like Mootools Element.set function does
+
