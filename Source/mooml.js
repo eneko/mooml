@@ -184,20 +184,21 @@ Mooml.Templates = {
 	templates: {},
 
 	/**
-	 * Registers a new template for later use
+	 * Registers a new template for later use or returns an existing template with that name
 	 * @param {String} name The name of the template
 	 * @param {Function} code The code function of the template
 	 */
-	register: function(name, code, options) {
-		this.templates[name] = new Mooml.Template(name, code, options);
+	registerTemplate: function(name, code, options) {
+		var template = this.templates[name];
+		return (template)? template : new Mooml.Template(name, code, options);
 	},
 
 	/**
-	 * Evaluates a registered template
+	 * Evaluates a registered template or returns null if template not registered
 	 * @param {String} name The name of the template to evaluate
 	 * @param {Object|Array} data Optional data object or array of objects
 	 */
-	render: function(name, data) {
+	renderTemplate: function(name, data) {
 		var template = this.templates[name];
 		return (template)? template.render(data) : null;
 	}
@@ -206,9 +207,10 @@ Mooml.Templates = {
 
 
 /**
- * Implement Mooml.Templates into Mooml
+ * Implement Mooml.Templates into Mooml and alias for backwards compatibility
  */
 $extend(Mooml, Mooml.Templates);
-
+Mooml.register = Mooml.registerTemplate;
+Mooml.render = Mooml.renderTemplate;
 
 Mooml.initEngine();
