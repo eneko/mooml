@@ -190,7 +190,7 @@ Mooml.Templates = {
 	 */
 	registerTemplate: function(name, code, options) {
 		var template = this.templates[name];
-		return (template)? template : new Mooml.Template(name, code, options);
+		return (template)? template : this.templates[name] = new Mooml.Template(name, code, options);
 	},
 
 	/**

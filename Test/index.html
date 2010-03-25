@@ -83,12 +83,12 @@
 			},
 			initialize: function(options) {
 				this.setOptions(options);
-				this.register('dog', function(bark) {
+				this.registerTemplate('dog', function(bark) {
 					div({ 'class': 'dog'}, bark);
 				});
 			},
 			toElement: function() {
-				return this.render('dog', this.options.bark);
+				return this.renderTemplate('dog', this.options.bark);
 			}
 		});
 
