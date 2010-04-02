@@ -1,8 +1,13 @@
 ﻿Mooml
 ===========
 
-Mooml is a javascript templating engine that let's you build html from Javascript using a very nice and clean syntax taking advantage of the power of Mootools.
+Mooml is a javascript templating engine that lets you build html from Javascript using a very nice and clean syntax taking advantage of the power of Mootools.
 **Mooml creates the actual dom elements** in the template, returning a single element if the template has one root or an array of elements if there are multiple roots.
+Templates can be defined in multiple ways:
+* global templates with Mooml.register()
+* local templates inside a class instance with this.registerTemplate()
+* on the fly with new Mooml.Template
+* embeded in the HTML DOM as <script type="text/mooml">
 
 ![Screenshot](http://github.com/eneko/mooml/raw/master/screenshot.jpg)
 
@@ -29,7 +34,17 @@ Or as an alternative:
 		);
 	});
 
-Both of the avobe templates will generate the following HTML structure, creating the dom elements for you. The first method will register the template globally while the second one wont.:
+Or in the DOM:
+
+	<script type="text/mooml" name="mytemplate">
+		div({id: 'mydivid'},
+			h2('Title'),
+			p('Lorem Ipsum'),
+			p(a({ href: 'http://example.com' }, 'click here'))
+		);
+	</script>
+
+All of the above templates will generate the following HTML structure, creating the dom elements for you. The first and third methods will register the template globally while the second one wont:
 
 	<div id="mydivid">
 		<h2>Title</h2>
@@ -50,6 +65,12 @@ Passing variables to a template can be done easily too:
 		);
 	});
 	var el = Mooml.render('mytemplate', { myDivId: 'newid' });
+
+DOM defined templates have the default parameters data & index, so it's equivalent to:
+
+	Mooml.register('mytemplate', function(data, index) {
+		// template code
+	});
 
 
 Rendering template arrays
@@ -87,7 +108,7 @@ Evaluating templates on the fly can be done by creating a template with the Moom
 Globalizing Mooml
 -----------------
 
-Since version 1.1, if you whish to globalize Mooml you need to download and include mooml-globalize.js in your project, after including mooml.js.
+Since version 1.1, if you wish to globalize Mooml you need to download and include mooml-globalize.js in your project, after including mooml.js.
 This will make all Mooml engine template tag functions available at the window scope.
 
 With mooml-globalize.js we can do this:

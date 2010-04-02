@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.1.1
+version: 1.2
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -32,7 +32,7 @@ requires:
 
 var Mooml = {
 
-	version: '1.1.1',
+	version: '1.2',
 	templates: {},
 	engine: { callstack: [], tags: {} },
 
@@ -104,7 +104,6 @@ var Mooml = {
 
 				$each(arguments, function(argument, index) {
 					if ($type(argument) === "function") argument = argument();
-
 					switch ($type(argument)) {
 						case "array":
 						case "element":
@@ -127,7 +126,7 @@ var Mooml = {
 						}
 						case "object": {
 							if (index === 0) {
-								if (template && template.saveElementRefs && argument.id) {
+								if (template && template.elementRefs && argument.id) {
 									template.elementRefs[argument.id] = el;
 								}
 								el.set(argument);
@@ -141,13 +140,17 @@ var Mooml = {
 				return el;
 			}
 		});
+
+		window.addEvent('domready', function() {
+			document.getElements('script[type=text/mooml]').each(function(template) {
+				Mooml.register(template.get('name'), new Function(['data', 'index'], template.get('text')));
+			});
+		});
 	},
 
 	/**
 	 * Prepares a template function so it can be called directly without using eval
-	 * This function parses the template replacing tag functions by Mooml.engine.tag calls
 	 * @param {function} code The template function to prepare
-	 * Protected: this method cannot be called from outside Mooml class
 	 */
 	prepare: function(code) {
 		var codeStr = code.toString();
@@ -165,8 +168,9 @@ Mooml.Template = new Class({
 	nodes: [],
 
 	initialize: function(name, code, options) {
-		this.saveElementRefs = (options && options.saveElementRefs === true)? true : false;
-		this.elementRefs = (options && options.elementRefs && typeof(options.elementRefs) === "object")? options.elementRefs : {};
+		if (options && options.elementRefs && typeof(options.elementRefs) === "object") {
+			this.elementRefs = options.elementRefs;
+		}
 		this.name = name;
 		this.code = Mooml.prepare(code);
 	},

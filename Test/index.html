@@ -5,8 +5,20 @@
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
 	<title>Mooml</title>
 	<style>
-		body { font: 12px Helvetica, Arial; background: #F4F5F5; }
+		body { font: 12px Helvetica, Arial; background: #f4f5f5; }
+		pre { background: #fff; padding: 4px; border: solid 1px #ccc; }
 	</style>
+	<script type="text/mooml" name="htmltemplate">
+		h2('Template embedded in HTML');
+		p(
+			'This template is defined in the HTML as ',
+			pre('&lt;script type="text\/mooml"&gt;\n\th2(\'Template embedded in HTML\');\n\tp(\'This template is defined in the HTML as \',\n\t\t...\n&lt;\/script&gt;'),
+			'Embedding Templates in HTML is very useful for graceful degradation, so this HTML is only rendered if Javascript is enabled.',
+			br(),
+			'This embedded templates support parameters too: ',
+			data.text
+		);
+	</script>
 </head>
 <body>
 	<h1>Mooml Demo</h1>
@@ -22,9 +34,11 @@
 
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
 	<script type="text/javascript" src="http://github.com/eneko/mooml/raw/master/Source/mooml.js"></script>
+	<!-- // <script type="text/javascript" src="../Source/mooml.js"></script> -->
 	<script type="text/javascript">
 
 		function searchTwitter(text) {
+			$('twitter-search-list').empty()
 			Mooml.engine.tags.script({
 				type: 'text/javascript',
 				src: 'http://search.twitter.com/search.json?q={text}&show_user=true&callback=renderData'.substitute({
@@ -34,7 +48,7 @@
 		}
 
 		function renderData(data) {
-			$('twitter-search-list').empty().adopt(Mooml.render('twitter-search-item', data.results));
+			$('twitter-search-list').adopt(Mooml.render('twitter-search-item', data.results));
 		}
 
 		Mooml.register('twitter-search-item', function(entry, index) {
@@ -73,9 +87,6 @@
 			}});
 		});
 
-		$(document.body).adopt(twitterTemplate.render('twitter-search'));
-		searchTwitter('mootools');
-
 		var Dog = new Class({
 			Implements: [Options, Mooml.Templates],
 			options: {
@@ -92,12 +103,43 @@
 			}
 		});
 
-		var body = $(document.body);
-		body.grab(Mooml.engine.tags.h2('Dog Demo'));
-		body.grab(new Dog());
-		body.grab(new Dog({ bark: 'Woof! Woof!' }));
-		body.grab(new Dog({ bark: 'Arf!' }));
 
+		window.addEvent('domready', function() {
+			var body = $(document.body);
+
+			// Dogs
+			body.grab(Mooml.engine.tags.h2('Dog Demo'));
+			body.grab(Mooml.engine.tags.pre('\
+var Dog = new Class({\n\
+  Implements: [Options, Mooml.Templates],\n\
+  options: {\n\
+    bark: \'Bark! Bark!\'\n\
+  },\n\
+  initialize: function(options) {\n\
+    this.setOptions(options);\n\
+    this.registerTemplate(\'dog\', function(bark) {\n\
+      div({ \'class\': \'dog\'}, bark);\n\
+    });\n\
+  },\n\
+  toElement: function() {\n\
+    return this.renderTemplate(\'dog\', this.options.bark);\n\
+  }\n\
+});\n\
+new Dog();\n\
+new Dog({ bark: \'Woof! Woof!\' });\n\
+new Dog({ bark: \'Arf!\' });\n\
+'));
+			body.grab(new Dog());
+			body.grab(new Dog({ bark: 'Woof! Woof!' }));
+			body.grab(new Dog({ bark: 'Arf!' }));
+
+			// HTML Template
+			body.adopt(Mooml.render('htmltemplate', {text: '[This text is being passed at render time]'}));
+
+			// Twitter
+			body.adopt(twitterTemplate.render('twitter-search'));
+			searchTwitter('mootools');
+		});
 	</script>
 </body>
 </html>
