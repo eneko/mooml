@@ -3,7 +3,9 @@
 
 Mooml is a javascript templating engine that lets you build html from Javascript using a very nice and clean syntax taking advantage of the power of Mootools.
 **Mooml creates the actual dom elements** in the template, returning a single element if the template has one root or an array of elements if there are multiple roots.
+
 Templates can be defined in multiple ways:
+
 * global templates with Mooml.register()
 * local templates inside a class instance with this.registerTemplate()
 * on the fly with new Mooml.Template
@@ -24,7 +26,7 @@ Creating Mooml templates is very easy:
 		);
 	});
 
-Or as an alternative:
+On the fly:
 
 	var template = new Mooml.Template('mytemplate', function() {
 		div({id: 'mydivid'},
@@ -34,7 +36,7 @@ Or as an alternative:
 		);
 	});
 
-Or in the DOM:
+In the DOM:
 
 	<script type="text/mooml" name="mytemplate">
 		div({id: 'mydivid'},
