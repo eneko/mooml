@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.2
+version: 1.2.1
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -32,7 +32,7 @@ requires:
 
 var Mooml = {
 
-	version: '1.2',
+	version: '1.2.1',
 	templates: {},
 	engine: { callstack: [], tags: {} },
 
@@ -156,7 +156,10 @@ var Mooml = {
 		var codeStr = code.toString();
 		var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
 		var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
-		return new Function(args, 'with (Mooml.engine.tags) {' + body + '}');
+		this.htmlTags.each(function(tag) {
+			body = body.replace(new RegExp('(^|[\\W])(' + tag + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
+		});
+		return new Function(args, body);
 	}
 
 };
