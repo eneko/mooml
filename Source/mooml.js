@@ -157,7 +157,7 @@ var Mooml = {
 		var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
 		var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
 		this.htmlTags.each(function(tag) {
-			body = body.replace(new RegExp('(^|[\\W])(' + tag + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
+			body = body.replace(new RegExp('(^|[^\\w.])(' + tag + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
 		});
 		return new Function(args, body);
 	}
