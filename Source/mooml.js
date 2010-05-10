@@ -71,6 +71,7 @@ var Mooml = {
 	 */
 	evaluate: function(template, data) {
 		var elements = [];
+		this.engine.template = template;
 		this.engine.callstack.push(template);
 
 		$splat($pick(data, {})).each(function(params, index) {
@@ -82,8 +83,12 @@ var Mooml = {
 		});
 
 		this.engine.callstack.pop();
-		if (this.engine.callstack.length && template.saveElementRefs) {
-			$extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
+		if (this.engine.callstack.length) {
+			if (template.elementRefs) {
+				$extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
+			}
+		} else {
+			this.engine.template = null;
 		}
 
 		return (elements.length > 1) ? elements : elements.shift();
@@ -99,10 +104,10 @@ var Mooml = {
 	initEngine: function() {
 		this.htmlTags.each(function(tag) {
 			Mooml.engine.tags[tag] = function() {
-				var template = Mooml.engine.callstack.getLast();
 				var el = new Element(tag);
 
-				$each(arguments, function(argument, index) {
+				for (var i=0, l=arguments.length; i<l; i++) {
+					var argument = arguments[i];
 					if ($type(argument) === "function") argument = argument();
 					switch ($type(argument)) {
 						case "array":
@@ -112,9 +117,9 @@ var Mooml = {
 							break;
 						}
 						case "string": {
-							if (template) {
+							if (Mooml.engine.template) {
 								el.getChildren().each(function(child) {
-									template.nodes.erase(child);
+									Mooml.engine.template.nodes.erase(child);
 								});
 							}
 							el.set('html', el.get('html') + argument);
@@ -125,18 +130,18 @@ var Mooml = {
 							break;
 						}
 						case "object": {
-							if (index === 0) {
-								if (template && template.elementRefs && argument.id) {
-									template.elementRefs[argument.id] = el;
+							if (i == 0) {
+								if (Mooml.engine.template && Mooml.engine.template.elementRefs && argument.id) {
+									Mooml.engine.template.elementRefs[argument.id] = el;
 								}
 								el.set(argument);
 							}
 							break;
 						}
 					}
-				});
+				}
 
-				if (template) template.nodes.push(el);
+				if (Mooml.engine.template) Mooml.engine.template.nodes.push(el);
 				return el;
 			}
 		});
@@ -156,9 +161,9 @@ var Mooml = {
 		var codeStr = code.toString();
 		var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
 		var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
-		this.htmlTags.each(function(tag) {
-			body = body.replace(new RegExp('(^|[^\\w.])(' + tag + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
-		});
+		for (var i=this.htmlTags.length; --i; ) {
+			body = body.replace(new RegExp('(^|[^\\w.])(' + this.htmlTags[i] + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
+		}
 		return new Function(args, body);
 	}
 

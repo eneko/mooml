@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Mooml Performance Tests</title>
+	<style>
+		* { margin: 0; padding: 0;}
+		body { font: 11px Arial; }
+	</style>
+</head>
+<body>
+</body>
+</html>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+<script type="text/javascript" src="../Source/mooml.js"></script>
+<script type="text/javascript">
+var end, start;
+Mooml.register('emptydiv', function() { div(); });
+Mooml.register('div', function(value) { div(value); });
+
+function log() {
+	new Element('p', { text: $A(arguments).join('') }).inject(document.body);
+}
+function logTime(start, end) {
+	log(end.getTime() - start.getTime(), 'ms');
+}
+
+
+// Render 10,000 empty divs
+
+log('10k empty divs:');
+start = new Date();
+for (var i=0; i<1E4; i++) {
+	Mooml.render('emptydiv');
+}
+logTime(start, new Date());
+
+
+// Render 10,000 empty divs
+
+log('10k empty divs:');
+start = new Date();
+for (var i=0; i<1E4; i++) {
+	Mooml.render('emptydiv');
+}
+logTime(start, new Date());
+
+
+
+
+</script>

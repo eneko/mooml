@@ -25,18 +25,6 @@ Mooml.register('div-value', function(value) {
 	div(value);
 });
 
-module("Tag Tests");
-test("Create elements for each Mooml supported tag", function() {
-	Mooml.htmlTags.each(function(tag) {
-		Mooml.registerTemplate('tagtest-'+tag, function(data) {
-			Mooml.engine.tags[data.tag]({id: data.tagid});
-		});
-		templateElements = Mooml.render('tagtest-'+tag, {tag: tag, tagid: 'tagid'});
-		equals(templateElements.tagName, tag.toUpperCase(), 'Element tag matches');
-		equals(templateElements.id, 'tagid', 'Element id matches');
-	});
-});
-
 module("Parameter Tests");
 test('Passing "false" parameter', function() {
 	templateElements = Mooml.render('div-text-value', false);
@@ -67,5 +55,19 @@ test('Passing an array of number values', function() {
 		equals(templateElements[index].innerHTML, data[index], 'Inner HTML equals data: ' + data[index]);
 	});
 });
+
+module("Tag Tests");
+test("Create elements for each Mooml supported tag", function() {
+	Mooml.htmlTags.each(function(tag) {
+		Mooml.registerTemplate('tagtest-'+tag, function(data) {
+			Mooml.engine.tags[data.tag]({id: data.tagid});
+		});
+		templateElements = Mooml.render('tagtest-'+tag, {tag: tag, tagid: 'tagid'});
+		equals(templateElements.tagName, tag.toUpperCase(), 'Element tag matches');
+		equals(templateElements.id, 'tagid', 'Element id matches');
+	});
+});
+
+
 
 </script>
