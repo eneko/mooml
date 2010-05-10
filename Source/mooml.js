@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.2.3
+version: 1.2.4
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -32,7 +32,7 @@ requires:
 
 var Mooml = {
 
-	version: '1.2.1',
+	version: '1.2.4',
 	templates: {},
 	engine: { callstack: [], tags: {} },
 
@@ -73,7 +73,7 @@ var Mooml = {
 		var elements = [];
 		this.engine.callstack.push(template);
 
-		$splat(data || {}).each(function(params, index) {
+		$splat($pick(data, {})).each(function(params, index) {
 			template.code(params, index);
 			elements.extend(template.nodes.filter(function(node) {
 				return node.getParent() === null;
@@ -150,7 +150,7 @@ var Mooml = {
 
 	/**
 	 * Prepares a template function so it can be called directly without using eval
-	 * @param {function} code The template function to prepare
+	 * @param {Function} code The template function to prepare
 	 */
 	prepare: function(code) {
 		var codeStr = code.toString();

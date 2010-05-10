@@ -1,0 +1,71 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<title>Mooml QUnit Tests</title>
+	<link rel="stylesheet" href="qunit.css" type="text/css" media="screen" />
+</head>
+<body>
+	<h1 id="qunit-header">QUnit example</h1>
+	<h2 id="qunit-banner"></h2>
+	<h2 id="qunit-userAgent"></h2>
+	<ol id="qunit-tests"></ol>
+</body>
+</html>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+<script type="text/javascript" src="../Source/mooml.js"></script>
+<script type="text/javascript" src="qunit.js"></script>
+<script type="text/javascript">
+var templateElements, data;
+
+// Templates used in the tests
+Mooml.register('div-text-value', function(value) {
+	div({text:value});
+});
+Mooml.register('div-value', function(value) {
+	div(value);
+});
+
+module("Tag Tests");
+test("Create elements for each Mooml supported tag", function() {
+	Mooml.htmlTags.each(function(tag) {
+		Mooml.registerTemplate('tagtest-'+tag, function(data) {
+			Mooml.engine.tags[data.tag]({id: data.tagid});
+		});
+		templateElements = Mooml.render('tagtest-'+tag, {tag: tag, tagid: 'tagid'});
+		equals(templateElements.tagName, tag.toUpperCase(), 'Element tag matches');
+		equals(templateElements.id, 'tagid', 'Element id matches');
+	});
+});
+
+module("Parameter Tests");
+test('Passing "false" parameter', function() {
+	templateElements = Mooml.render('div-text-value', false);
+	equals(templateElements.tagName, 'DIV', 'Element created is a DIV');
+	equals(templateElements.innerHTML, 'false', 'Inner HTML is "false"');
+});
+
+test('Passing "true" parameter', function() {
+	templateElements = Mooml.render('div-text-value', true);
+	equals(templateElements.tagName, 'DIV', 'Element created is a DIV');
+	equals(templateElements.innerHTML, 'true', 'Inner HTML is "true"');
+});
+
+test('Passing an array of string values', function() {
+	data = ['bob', 'john', 'eric', 'carlos', 'chris'];
+	templateElements = Mooml.render('div-value', data);
+	equals(templateElements.length, data.length, data.length + ' elements created');
+	data.each(function(value, index) {
+		equals(templateElements[index].innerHTML, data[index], 'Inner HTML equals data');
+	});
+});
+
+test('Passing an array of number values', function() {
+	data = [5, -56, 765, 342, 1000000, 1E6, 3.1415, 0.123456789];
+	templateElements = Mooml.render('div-value', data);
+	equals(templateElements.length, data.length, data.length + ' elements created');
+	data.each(function(value, index) {
+		equals(templateElements[index].innerHTML, data[index], 'Inner HTML equals data: ' + data[index]);
+	});
+});
+
+</script>
