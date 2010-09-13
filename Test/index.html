@@ -8,11 +8,11 @@
 		body { font: 12px Helvetica, Arial; background: #f4f5f5; }
 		pre { background: #fff; padding: 4px; border: solid 1px #ccc; }
 	</style>
-	<script type="text/mooml" name="htmltemplate">
+	<script type="text/mooml" name="htmltemplate" id="htmltemplate">
 		h2('Template embedded in HTML');
 		p(
 			'This template is defined in the HTML as ',
-			pre('&lt;script type="text\/mooml"&gt;\n\th2(\'Template embedded in HTML\');\n\tp(\'This template is defined in the HTML as \',\n\t\t...\n&lt;\/script&gt;'),
+			pre('&lt;script type="text\/mooml"&gt;' + data.templateCode + '&lt;\/script&gt;'),
 			'Embedding Templates in HTML is very useful for graceful degradation, so this HTML is only rendered if Javascript is enabled.',
 			br(),
 			'This embedded templates support parameters too: ',
@@ -33,7 +33,7 @@
 	</ul>
 
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
-	<!-- script type="text/javascript" src="http://github.com/eneko/mooml/raw/master/Source/mooml.js"></script -->
+	<!--script type="text/javascript" src="http://github.com/eneko/mooml/raw/master/Source/mooml.js"></script-->
 	<script type="text/javascript" src="../Source/mooml.js"></script>
 	<script type="text/javascript">
 
@@ -134,7 +134,10 @@ new Dog({ bark: \'Arf!\' });\n\
 			body.grab(new Dog({ bark: 'Arf!' }));
 
 			// HTML Template
-			body.adopt(Mooml.render('htmltemplate', {text: '[This text is being passed at render time]'}));
+			body.adopt(Mooml.render('htmltemplate', {
+				templateCode: $('htmltemplate').innerHTML,
+				text: '[This text is being passed at render time]'
+			}));
 
 			// Twitter
 			body.adopt(twitterTemplate.render('twitter-search'));

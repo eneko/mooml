@@ -71,8 +71,12 @@ var Mooml = {
 	 */
 	evaluate: function(template, data) {
 		var elements = [];
-		this.engine.template = template;
 		this.engine.callstack.push(template);
+
+		if (template.prepared == false) {
+			template.code = this.prepare(template.code);
+			template.prepared = true;
+		}
 
 		$splat($pick(data, {})).each(function(params, index) {
 			template.code(params, index);
@@ -87,8 +91,6 @@ var Mooml = {
 			if (template.elementRefs) {
 				$extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
 			}
-		} else {
-			this.engine.template = null;
 		}
 
 		return (elements.length > 1) ? elements : elements.shift();
@@ -104,6 +106,7 @@ var Mooml = {
 	initEngine: function() {
 		this.htmlTags.each(function(tag) {
 			Mooml.engine.tags[tag] = function() {
+				var template = Mooml.engine.callstack.getLast();
 				var el = new Element(tag);
 
 				for (var i=0, l=arguments.length; i<l; i++) {
@@ -117,9 +120,9 @@ var Mooml = {
 							break;
 						}
 						case "string": {
-							if (Mooml.engine.template) {
+							if (template) {
 								el.getChildren().each(function(child) {
-									Mooml.engine.template.nodes.erase(child);
+									template.nodes.erase(child);
 								});
 							}
 							el.set('html', el.get('html') + argument);
@@ -130,18 +133,20 @@ var Mooml = {
 							break;
 						}
 						case "object": {
-							if (i == 0) {
-								if (Mooml.engine.template && Mooml.engine.template.elementRefs && argument.id) {
-									Mooml.engine.template.elementRefs[argument.id] = el;
+							if (i === 0) {
+								if (template && template.elementRefs && argument.id) {
+									template.elementRefs[argument.id] = el;
 								}
 								el.set(argument);
+							} else if ($type(argument.toElement) == "function") {
+								el.adopt(argument.toElement());
 							}
 							break;
 						}
 					}
 				}
 
-				if (Mooml.engine.template) Mooml.engine.template.nodes.push(el);
+				if (template) template.nodes.push(el);
 				return el;
 			}
 		});
@@ -161,7 +166,7 @@ var Mooml = {
 		var codeStr = code.toString();
 		var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
 		var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
-		for (var i=this.htmlTags.length; --i; ) {
+		for (var i=this.htmlTags.length; --i >= 0; ) {
 			body = body.replace(new RegExp('(^|[^\\w.])(' + this.htmlTags[i] + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
 		}
 		return new Function(args, body);
@@ -180,7 +185,8 @@ Mooml.Template = new Class({
 			this.elementRefs = options.elementRefs;
 		}
 		this.name = name;
-		this.code = Mooml.prepare(code);
+		this.code = code;
+		this.prepared = false;
 	},
 
 	render: function(data) {

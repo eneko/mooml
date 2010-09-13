@@ -14,38 +14,60 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
 <script type="text/javascript" src="../Source/mooml.js"></script>
 <script type="text/javascript">
-var end, start;
+var queue=[];
 Mooml.register('emptydiv', function() { div(); });
 Mooml.register('div', function(value) { div(value); });
 
 function log() {
 	new Element('p', { text: $A(arguments).join('') }).inject(document.body);
 }
-function logTime(start, end) {
-	log(end.getTime() - start.getTime(), 'ms');
+function timeDiff(start, end) {
+	return end.getTime() - start.getTime() + 'ms';
 }
-
+function test(desc, fn) {
+	queue.push({ desc: desc, fn: fn });
+}
+function start() {
+	if (!queue.length) return;
+	var test = queue.shift();
+	var then = new Date();
+	test.fn();
+	log(test.desc, ' ', timeDiff(then, new Date()));
+	setTimeout(start, 10);
+}
 
 // Render 10,000 empty divs
+test('10k empty divs:', function() {
+	for (var i=0; i<1E4; i++) {
+		Mooml.render('emptydiv');
+	}
+});
 
-log('10k empty divs:');
-start = new Date();
-for (var i=0; i<1E4; i++) {
-	Mooml.render('emptydiv');
-}
-logTime(start, new Date());
+// Render 10,000 divs with text
 
-
-// Render 10,000 empty divs
-
-log('10k empty divs:');
-start = new Date();
-for (var i=0; i<1E4; i++) {
-	Mooml.render('emptydiv');
-}
-logTime(start, new Date());
+test('10k divs with text:', function() {
+	for (var i=0; i<1E4; i++) {
+		Mooml.render('div', '.span.lorem./span. .p..b..u.ipsum.u dolor./b. sit./p.');
+	}
+});
 
 
+// Render 10,000 divs with html
 
+test('10k divs with html:', function() {
+	for (var i=0; i<1E4; i++) {
+		Mooml.render('div', '<span>lorem</span> <p><b><u>ipsum<u> dolor</b> sit</p>');
+	}
+});
+
+// Render 5x10,000 divs with text
+
+test('5x10k divs with text:', function() {
+	for (var i=0; i<1E4; i++) {
+		Mooml.render('div', ['a','b','c','d','e']);
+	}
+});
+
+start();
 
 </script>

@@ -12,6 +12,7 @@
 </body>
 </html>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+<!--script type="text/javascript" src="http://github.com/eneko/mooml/raw/master/Source/mooml.js"></script-->
 <script type="text/javascript" src="../Source/mooml.js"></script>
 <script type="text/javascript" src="qunit.js"></script>
 <script type="text/javascript">
@@ -24,8 +25,30 @@ Mooml.register('div-text-value', function(value) {
 Mooml.register('div-value', function(value) {
 	div(value);
 });
+Mooml.register('string-test', function(data) {
+	div(
+		'before',
+		div(data),
+		'after'
+	);
+});
+
+// *******************************************************
 
 module("Parameter Tests");
+
+test('Passing a string', function() {
+	var wrapper = new Element('div');
+	wrapper.adopt(Mooml.render('string-test', 'test-string'));
+	equals(wrapper.innerHTML, '<div>before<div>test-string</div>after</div>', 'InnerHTML matches string');
+});
+
+test('Passing HTML', function() {
+	var wrapper = new Element('div');
+	wrapper.adopt(Mooml.render('string-test', '<span>lorem <b>ipsum</b></span>'));
+	equals(wrapper.innerHTML, '<div>before<div><span>lorem <b>ipsum</b></span></div>after</div>', 'InnerHTML matches html');
+});
+
 test('Passing "false" parameter', function() {
 	templateElements = Mooml.render('div-text-value', false);
 	equals(templateElements.tagName, 'DIV', 'Element created is a DIV');
@@ -55,6 +78,10 @@ test('Passing an array of number values', function() {
 		equals(templateElements[index].innerHTML, data[index], 'Inner HTML equals data: ' + data[index]);
 	});
 });
+
+
+
+// *******************************************************
 
 module("Tag Tests");
 test("Create elements for each Mooml supported tag", function() {
