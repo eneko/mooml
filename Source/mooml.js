@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.2.4
+version: 1.3.0
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -23,9 +23,9 @@ provides:
 - Mooml.Templates
 
 requires:
-- core/1.2.4:Class
-- core/1.2.4:Elements
-- core/1.2.4:Array
+- core/1.3.0:Class
+- core/1.3.0:Elements
+- core/1.3.0:Array
 
 ...
 */
@@ -78,9 +78,9 @@ var Mooml = {
 			template.prepared = true;
 		}
 
-		$splat($pick(data, {})).each(function(params, index) {
+		Array.from([data, {}].pick()).each(function(params, index) {
 			template.code(params, index);
-			elements.extend(template.nodes.filter(function(node) {
+			elements.append(template.nodes.filter(function(node) {
 				return node.getParent() === null;
 			}));
 			template.nodes.empty();
@@ -89,7 +89,7 @@ var Mooml = {
 		this.engine.callstack.pop();
 		if (this.engine.callstack.length) {
 			if (template.elementRefs) {
-				$extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
+				Array.extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
 			}
 		}
 
@@ -111,8 +111,8 @@ var Mooml = {
 
 				for (var i=0, l=arguments.length; i<l; i++) {
 					var argument = arguments[i];
-					if ($type(argument) === "function") argument = argument();
-					switch ($type(argument)) {
+					if (typeOf(argument) === "function") argument = argument();
+					switch (typeOf(argument)) {
 						case "array":
 						case "element":
 						case "collection": {
@@ -138,7 +138,7 @@ var Mooml = {
 									template.elementRefs[argument.id] = el;
 								}
 								el.set(argument);
-							} else if ($type(argument.toElement) == "function") {
+							} else if (typeOf(argument.toElement) == "function") {
 								el.adopt(argument.toElement());
 							}
 							break;
@@ -198,7 +198,7 @@ Mooml.Template = new Class({
 /**
  * Mixin for implemenation in Mootools classes: Implements: [Mooml.Templates, Options, ...]
  */
-Mooml.Templates = {
+Mooml.Templates = new Class({
 	templates: {},
 
 	/**
@@ -221,13 +221,13 @@ Mooml.Templates = {
 		return (template)? template.render(data) : null;
 	}
 
-}
+});
 
 
 /**
  * Implement Mooml.Templates into Mooml and alias for backwards compatibility
  */
-$extend(Mooml, Mooml.Templates);
+Object.append(Mooml, new Mooml.Templates());
 Mooml.register = Mooml.registerTemplate;
 Mooml.render = Mooml.renderTemplate;
 

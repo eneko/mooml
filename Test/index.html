@@ -32,7 +32,7 @@
 		<li>Mooml related posts: <a href="http://dev.enekoalonso.com/tag/mooml/">http://dev.enekoalonso.com/tag/mooml/</a></li>
 	</ul>
 
-	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+	<script type="text/javascript" src="mootools-core-1.3-full-nocompat.js"></script>
 	<!--script type="text/javascript" src="http://github.com/eneko/mooml/raw/master/Source/mooml.js"></script-->
 	<script type="text/javascript" src="../Source/mooml.js"></script>
 	<script type="text/javascript">
@@ -52,6 +52,7 @@
 		}
 
 		Mooml.register('twitter-search-item', function(entry, index) {
+			console.log('twitter-search-item: ', index);
 			li({ id: "tweet-" + entry.id, styles: {
 					listStyle: 'none',
 					background: index & 1 ? '#fff' : '#ddd',

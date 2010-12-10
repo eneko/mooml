@@ -11,7 +11,7 @@
 <body>
 </body>
 </html>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/mootools/1.2.4/mootools-yui-compressed.js"></script>
+<script type="text/javascript" src="mootools-core-1.3-full-nocompat.js"></script>
 <script type="text/javascript" src="../Source/mooml.js"></script>
 <script type="text/javascript">
 var queue=[];
@@ -19,7 +19,7 @@ Mooml.register('emptydiv', function() { div(); });
 Mooml.register('div', function(value) { div(value); });
 
 function log() {
-	new Element('p', { text: $A(arguments).join('') }).inject(document.body);
+	new Element('p', { text: Array.from(arguments).join('') }).inject(document.body);
 }
 function timeDiff(start, end) {
 	return end.getTime() - start.getTime() + 'ms';
