@@ -99,7 +99,7 @@ var Mooml = {
 	/**
 	 * Initializes the engine generating a javascript function for every html
 	 * tag that can be used on the template.
-	 * Template tag functions can receive options for the element, child 
+	 * Template tag functions can receive options for the element, child
 	 * elements and html code as parameters.
 	 * initialize can be called by the user in case of adding additional tags.
 	 */
