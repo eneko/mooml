@@ -32,145 +32,150 @@ requires:
 
 var Mooml = {
 
-	version: '1.2.4',
-	templates: {},
-	engine: { callstack: [], tags: {} },
+    version: '1.2.4',
+    templates: {},
+    engine: { callstack: [], tags: {} },
 
-	htmlTags: [
-		"a", "abbr", "address", "area", "article", "aside", "audio",
-		"b", "base", "bdo", "blockquote", "body", "br", "button",
-		"canvas", "caption", "cite", "col", "colgroup", "command",
-		"datalist", "dd", "del", "details", "dialog", "dfn", "div", "dl", "dt",
-		"em", "embed",
-		"fieldset", "figure",
-		"footer", "form",
-		"h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html",
-		"i", "iframe", "img", "input", "ins",
-		"keygen", "kbd",
-		"label", "legend", "li", "link",
-		"map", "mark", "menu", "meta", "meter",
-		"nav", "noscript",
-		"object", "ol", "optgroup", "option", "output",
-		"p", "param", "pre", "progress",
-		"q",
-		"rp", "rt", "ruby",
-		"samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup",
-		"table", "tbody", "td", "textarea", "tfoot", "th", "thead", "time", "title", "tr",
-		"ul",
-		"var", "video",
-		// Deprecated in HTML 5
-		"acronym", "applet", "basefont", "big", "center", "dir", "font", "frame", "frameset", "noframes", "s", "strike", "tt", "u", "xmp"
-		// Not supported tags
-		// "code"
-	],
+    htmlTags: [
+        "a", "abbr", "address", "area", "article", "aside", "audio",
+        "b", "base", "bdo", "blockquote", "body", "br", "button",
+        "canvas", "caption", "cite", "col", "colgroup", "command",
+        "datalist", "dd", "del", "details", "dialog", "dfn", "div", "dl", "dt",
+        "em", "embed",
+        "fieldset", "figure",
+        "footer", "form",
+        "h1", "h2", "h3", "h4", "h5", "h6", "head", "header", "hgroup", "hr", "html",
+        "i", "iframe", "img", "input", "ins",
+        "keygen", "kbd",
+        "label", "legend", "li", "link",
+        "map", "mark", "menu", "meta", "meter",
+        "nav", "noscript",
+        "object", "ol", "optgroup", "option", "output",
+        "p", "param", "pre", "progress",
+        "q",
+        "rp", "rt", "ruby",
+        "samp", "script", "section", "select", "small", "source", "span", "strong", "style", "sub", "sup",
+        "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "time", "title", "tr",
+        "ul",
+        "var", "video",
+        // Deprecated in HTML 5
+        "acronym", "applet", "basefont", "big", "center", "dir", "font", "frame", "frameset", "noframes", "s", "strike", "tt", "u", "xmp"
+        // Not supported tags
+        // "code"
+    ],
 
-	/**
-	 * Evaluates a Mooml template supporting nested templates
-	 * @param {Mooml.Template} template The template function
-	 * @param {Object|Array} data Optional data object or array of objects
-	 */
-	evaluate: function(template, data) {
-		var elements = [];
-		this.engine.callstack.push(template);
+    /**
+     * Evaluates a Mooml template supporting nested templates
+     * @param {Mooml.Template} template The template function
+     * @param {Object|Array} data Optional data object or array of objects
+     * @param {Object} bind Optional Changes the scope of "this" within the target template to refer to the bind parameter.
+     */
+    evaluate: function(template, data, bind) {
+        var elements = [];
+        this.engine.callstack.push(template);
 
-		if (template.prepared == false) {
-			template.code = this.prepare(template.code);
-			template.prepared = true;
-		}
+        if (template.prepared == false) {
+            template.code = this.prepare(template.code);
+            template.prepared = true;
+        }
 
-		Array.from([data, {}].pick()).each(function(params, index) {
-			template.code(params, index);
-			elements.append(template.nodes.filter(function(node) {
-				return node.getParent() === null;
-			}));
-			template.nodes.empty();
-		});
+        Array.from([data, {}].pick()).each(function(params, index) {
+            if (bind) {
+            template.code.apply(bind, [params, index]);
+            } else {
+                template.code(params, index);
+            }
+            elements.append(template.nodes.filter(function(node) {
+                return node.getParent() === null;
+            }));
+            template.nodes.empty();
+        });
 
-		this.engine.callstack.pop();
-		if (this.engine.callstack.length) {
-			if (template.elementRefs) {
-				Array.extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
-			}
-		}
+        this.engine.callstack.pop();
+        if (this.engine.callstack.length) {
+            if (template.elementRefs) {
+                Array.extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
+            }
+        }
 
-		return (elements.length > 1) ? elements : elements.shift();
-	},
+        return (elements.length > 1) ? elements : elements.shift();
+    },
 
-	/**
-	 * Initializes the engine generating a javascript function for every html
-	 * tag that can be used on the template.
-	 * Template tag functions can receive options for the element, child 
-	 * elements and html code as parameters.
-	 * initialize can be called by the user in case of adding additional tags.
-	 */
-	initEngine: function() {
-		this.htmlTags.each(function(tag) {
-			Mooml.engine.tags[tag] = function() {
-				var template = Mooml.engine.callstack.getLast();
-				var el = new Element(tag);
+    /**
+     * Initializes the engine generating a javascript function for every html
+     * tag that can be used on the template.
+     * Template tag functions can receive options for the element, child
+     * elements and html code as parameters.
+     * initialize can be called by the user in case of adding additional tags.
+     */
+    initEngine: function() {
+        this.htmlTags.each(function(tag) {
+            Mooml.engine.tags[tag] = function() {
+                var template = Mooml.engine.callstack.getLast();
+                var el = new Element(tag);
 
-				for (var i=0, l=arguments.length; i<l; i++) {
-					var argument = arguments[i];
-					if (typeOf(argument) === "function") argument = argument();
-					switch (typeOf(argument)) {
-						case "array":
-						case "element":
-						case "collection": {
-							el.adopt(argument);
-							break;
-						}
-						case "string": {
-							if (template) {
-								el.getChildren().each(function(child) {
-									template.nodes.erase(child);
-								});
-							}
-							el.set('html', el.get('html') + argument);
-							break;
-						}
-						case "number": {
-							el.appendText(argument.toString());
-							break;
-						}
-						case "object": {
-							if (i === 0) {
-								if (template && template.elementRefs && argument.id) {
-									template.elementRefs[argument.id] = el;
-								}
-								el.set(argument);
-							} else if (typeOf(argument.toElement) == "function") {
-								el.adopt(argument.toElement());
-							}
-							break;
-						}
-					}
-				}
+                for (var i=0, l=arguments.length; i<l; i++) {
+                    var argument = arguments[i];
+                    if (typeOf(argument) === "function") argument = argument();
+                    switch (typeOf(argument)) {
+                        case "array":
+                        case "element":
+                        case "collection": {
+                            el.adopt(argument);
+                            break;
+                        }
+                        case "string": {
+                            if (template) {
+                                el.getChildren().each(function(child) {
+                                    template.nodes.erase(child);
+                                });
+                            }
+                            el.set('html', el.get('html') + argument);
+                            break;
+                        }
+                        case "number": {
+                            el.appendText(argument.toString());
+                            break;
+                        }
+                        case "object": {
+                            if (i === 0) {
+                                if (template && template.elementRefs && argument.id) {
+                                    template.elementRefs[argument.id] = el;
+                                }
+                                el.set(argument);
+                            } else if (typeOf(argument.toElement) == "function") {
+                                el.adopt(argument.toElement());
+                            }
+                            break;
+                        }
+                    }
+                }
 
-				if (template) template.nodes.push(el);
-				return el;
-			}
-		});
+                if (template) template.nodes.push(el);
+                return el;
+            }
+        });
 
-		window.addEvent('domready', function() {
-			document.getElements('script[type=text/mooml]').each(function(template) {
-				Mooml.register(template.get('name'), new Function(['data', 'index'], template.get('text')));
-			});
-		});
-	},
+        window.addEvent('domready', function() {
+            document.getElements('script[type=text/mooml]').each(function(template) {
+                Mooml.register(template.get('name'), new Function(['data', 'index'], template.get('text')));
+            });
+        });
+    },
 
-	/**
-	 * Prepares a template function so it can be called directly without using eval
-	 * @param {Function} code The template function to prepare
-	 */
-	prepare: function(code) {
-		var codeStr = code.toString();
-		var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
-		var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
-		for (var i=this.htmlTags.length; --i >= 0; ) {
-			body = body.replace(new RegExp('(^|[^\\w.])(' + this.htmlTags[i] + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
-		}
-		return new Function(args, body);
-	}
+    /**
+     * Prepares a template function so it can be called directly without using eval
+     * @param {Function} code The template function to prepare
+     */
+    prepare: function(code) {
+        var codeStr = code.toString();
+        var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
+        var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
+        for (var i=this.htmlTags.length; --i >= 0; ) {
+            body = body.replace(new RegExp('(^|[^\\w.])(' + this.htmlTags[i] + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
+        }
+        return new Function(args, body);
+    }
 
 };
 
@@ -178,20 +183,20 @@ var Mooml = {
  * Template class for Mooml templates
  */
 Mooml.Template = new Class({
-	nodes: [],
+    nodes: [],
 
-	initialize: function(name, code, options) {
-		if (options && options.elementRefs && typeof(options.elementRefs) === "object") {
-			this.elementRefs = options.elementRefs;
-		}
-		this.name = name;
-		this.code = code;
-		this.prepared = false;
-	},
+    initialize: function(name, code, options) {
+        if (options && options.elementRefs && typeof(options.elementRefs) === "object") {
+            this.elementRefs = options.elementRefs;
+        }
+        this.name = name;
+        this.code = code;
+        this.prepared = false;
+    },
 
-	render: function(data) {
-		return Mooml.evaluate(this, data);
-	}
+    render: function(data, bind) {
+        return Mooml.evaluate(this, data, bind);
+    }
 });
 
 
@@ -199,27 +204,28 @@ Mooml.Template = new Class({
  * Mixin for implemenation in Mootools classes: Implements: [Mooml.Templates, Options, ...]
  */
 Mooml.Templates = new Class({
-	templates: {},
+    templates: {},
 
-	/**
-	 * Registers a new template for later use or returns an existing template with that name
-	 * @param {String} name The name of the template
-	 * @param {Function} code The code function of the template
-	 */
-	registerTemplate: function(name, code, options) {
-		var template = this.templates[name];
-		return (template)? template : this.templates[name] = new Mooml.Template(name, code, options);
-	},
+    /**
+     * Registers a new template for later use or returns an existing template with that name
+     * @param {String} name The name of the template
+     * @param {Function} code The code function of the template
+     */
+    registerTemplate: function(name, code, options) {
+        var template = this.templates[name];
+        return (template)? template : this.templates[name] = new Mooml.Template(name, code, options);
+    },
 
-	/**
-	 * Evaluates a registered template or returns null if template not registered
-	 * @param {String} name The name of the template to evaluate
-	 * @param {Object|Array} data Optional data object or array of objects
-	 */
-	renderTemplate: function(name, data) {
-		var template = this.templates[name];
-		return (template)? template.render(data) : null;
-	}
+    /**
+     * Evaluates a registered template or returns null if template not registered
+     * @param {String} name The name of the template to evaluate
+     * @param {Object|Array} data Optional data object or array of objects
+     * @param {Object} bind Optional Changes the scope of "this" within the target template to refer to the bind parameter.
+     */
+    renderTemplate: function(name, data, bind) {
+        var template = this.templates[name];
+        return (template)? template.render(data, [bind, this].pick()) : null;
+    }
 
 });
 
