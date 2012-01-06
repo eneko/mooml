@@ -20,5 +20,5 @@ requires:
 */
 
 (function() {
-    Native.implement([Window], Mooml.engine.tags);
+    Window.implement(Mooml.engine.tags);
 })()
