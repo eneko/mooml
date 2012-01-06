@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml-globalize.js
-version: 1.3.0
+version: 1.3.1
 description: Mooml Globalize makes all template functions available in the global scope of the window object.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -20,5 +20,5 @@ requires:
 */
 
 (function() {
-	Native.implement([Window], Mooml.engine.tags);
+    Native.implement([Window], Mooml.engine.tags);
 })()
