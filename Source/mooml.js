@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.3.0
+version: 1.3.1
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -145,6 +145,8 @@ var Mooml = {
                                 el.set(argument);
                             } else if (typeOf(argument.toElement) == "function") {
                                 el.adopt(argument.toElement());
+                            } else {
+                                Object.append(el, argument);
                             }
                             break;
                         }
