@@ -9,6 +9,7 @@ source: http://github.com/eneko/mooml
 
 authors:
 - Eneko Alonso (http://enekoalonso.com)
+- Ahmad Nassri (http://ahmadnassri.com)
 
 provides:
 - Window.div
