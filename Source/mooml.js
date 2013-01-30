@@ -1,7 +1,7 @@
 ﻿/*
 ---
 script: mooml.js
-version: 1.3.0
+version: 1.3.1
 description: Mooml is a javasctript templating engine for HTML generation, powered by Mootools.
 license: MIT-style
 download: http://mootools.net/forge/p/mooml
@@ -10,6 +10,7 @@ htmltags: http://www.w3schools.com/html5/html5_reference.asp
 
 authors:
 - Eneko Alonso: (http://enekoalonso.com)
+- Ahmad Nassri (http://ahmadnassri.com)
 
 credits:
 - Ed Spencer: Mooml is based on Ed Spencer's Jaml (http://edspencer.github.com/jaml)
@@ -32,7 +33,7 @@ requires:
 
 var Mooml = {
 
-    version: '1.2.4',
+    version: '1.3.1',
     templates: {},
     engine: { callstack: [], tags: {} },
 
@@ -59,9 +60,9 @@ var Mooml = {
         "ul",
         "var", "video",
         // Deprecated in HTML 5
-        "acronym", "applet", "basefont", "big", "center", "dir", "font", "frame", "frameset", "noframes", "s", "strike", "tt", "u", "xmp"
+        "acronym", "applet", "basefont", "big", "center", "dir", "font", "frame", "frameset", "noframes", "s", "strike", "tt", "u", "xmp",
         // Not supported tags
-        // "code"
+        "code"
     ],
 
     /**
@@ -75,23 +76,26 @@ var Mooml = {
         this.engine.callstack.push(template);
 
         if (template.prepared == false) {
-            template.code = this.prepare(template.code);
+            template.HTMLCode = this.prepare(template.HTMLCode);
             template.prepared = true;
         }
 
         Array.from([data, {}].pick()).each(function(params, index) {
             if (bind) {
-            template.code.apply(bind, [params, index]);
+                template.HTMLCode.apply(bind, [params, index]);
             } else {
-                template.code(params, index);
+                template.HTMLCode(params, index);
             }
+
             elements.append(template.nodes.filter(function(node) {
                 return node.getParent() === null;
             }));
+
             template.nodes.empty();
         });
 
         this.engine.callstack.pop();
+
         if (this.engine.callstack.length) {
             if (template.elementRefs) {
                 Array.extend(this.engine.callstack.getLast().elementRefs, template.elementRefs);
@@ -117,14 +121,15 @@ var Mooml = {
                 for (var i=0, l=arguments.length; i<l; i++) {
                     var argument = arguments[i];
                     if (typeOf(argument) === "function") argument = argument();
+
                     switch (typeOf(argument)) {
                         case "array":
                         case "element":
-                        case "collection": {
+                        case "collection":
                             el.adopt(argument);
                             break;
-                        }
-                        case "string": {
+
+                        case "string":
                             if (template) {
                                 el.getChildren().each(function(child) {
                                     template.nodes.erase(child);
@@ -132,26 +137,29 @@ var Mooml = {
                             }
                             el.set('html', el.get('html') + argument);
                             break;
-                        }
-                        case "number": {
+
+                        case "number":
                             el.appendText(argument.toString());
                             break;
-                        }
-                        case "object": {
+
+                        case "object":
                             if (i === 0) {
                                 if (template && template.elementRefs && argument.id) {
                                     template.elementRefs[argument.id] = el;
                                 }
+
                                 el.set(argument);
                             } else if (typeOf(argument.toElement) == "function") {
                                 el.adopt(argument.toElement());
                             }
                             break;
-                        }
                     }
                 }
 
-                if (template) template.nodes.push(el);
+                if (template) {
+                    template.nodes.push(el);
+                }
+
                 return el;
             }
         });
@@ -165,12 +173,13 @@ var Mooml = {
 
     /**
      * Prepares a template function so it can be called directly without using eval
-     * @param {Function} code The template function to prepare
+     * @param {Function} HTMLCode The template function to prepare
      */
-    prepare: function(code) {
-        var codeStr = code.toString();
-        var args = codeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
-        var body = codeStr.match(/\{([\s\S]*)\}/m)[1];
+    prepare: function(HTMLCode) {
+        var HTMLCodeStr = HTMLCode.toString();
+        var args = HTMLCodeStr.match(/\(([a-zA-Z0-9,\s]*)\)/)[1].replace(/\s/g, '').split(',');
+        var body = HTMLCodeStr.match(/\{([\s\S]*)\}/m)[1];
+
         for (var i=this.htmlTags.length; --i >= 0; ) {
             body = body.replace(new RegExp('(^|[^\\w.])(' + this.htmlTags[i] + ')([\\s]*(?=\\())', 'g'), '$1Mooml.engine.tags.$2$3')
         }
@@ -185,12 +194,13 @@ var Mooml = {
 Mooml.Template = new Class({
     nodes: [],
 
-    initialize: function(name, code, options) {
+    initialize: function(name, HTMLCode, options) {
         if (options && options.elementRefs && typeof(options.elementRefs) === "object") {
             this.elementRefs = options.elementRefs;
         }
+
         this.name = name;
-        this.code = code;
+        this.HTMLCode = HTMLCode;
         this.prepared = false;
     },
 
@@ -209,11 +219,11 @@ Mooml.Templates = new Class({
     /**
      * Registers a new template for later use or returns an existing template with that name
      * @param {String} name The name of the template
-     * @param {Function} code The code function of the template
+     * @param {Function} HTMLCode The code function of the template
      */
-    registerTemplate: function(name, code, options) {
+    registerTemplate: function(name, HTMLCode, options) {
         var template = this.templates[name];
-        return (template)? template : this.templates[name] = new Mooml.Template(name, code, options);
+        return (template)? template : this.templates[name] = new Mooml.Template(name, HTMLCode, options);
     },
 
     /**
@@ -226,7 +236,6 @@ Mooml.Templates = new Class({
         var template = this.templates[name];
         return (template)? template.render(data, [bind, this].pick()) : null;
     }
-
 });
 
 
