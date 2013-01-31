@@ -18,62 +18,75 @@ How to use
 
 Creating Mooml templates is very easy:
 
-	Mooml.register('mytemplate', function() {
-		div({id: 'mydivid'},
-			h2('Title'),
-			p('Lorem Ipsum'),
-			p(a({ href: 'http://example.com' }, 'click here'))
-		);
-	});
+```javascript
+Mooml.register('mytemplate', function() {
+    div({id: 'mydivid'},
+        h2('Title'),
+        p('Lorem Ipsum'),
+        p(a({ href: 'http://example.com' }, 'click here'))
+    );
+});
+```
 
 On the fly:
 
-	var template = new Mooml.Template('mytemplate', function() {
-		div({id: 'mydivid'},
-			h2('Title'),
-			p('Lorem Ipsum'),
-			p(a({ href: 'http://example.com' }, 'click here'))
-		);
-	});
+```javascript
+var template = new Mooml.Template('mytemplate', function() {
+    div({id: 'mydivid'},
+        h2('Title'),
+        p('Lorem Ipsum'),
+        p(a({ href: 'http://example.com' }, 'click here'))
+    );
+});
+```
 
 In the DOM:
 
-	<script type="text/mooml" name="mytemplate">
-		div({id: 'mydivid'},
-			h2('Title'),
-			p('Lorem Ipsum'),
-			p(a({ href: 'http://example.com' }, 'click here'))
-		);
-	</script>
+```html
+<script type="text/mooml" name="mytemplate">
+    div({id: 'mydivid'},
+        h2('Title'),
+        p('Lorem Ipsum'),
+        p(a({ href: 'http://example.com' }, 'click here'))
+    );
+</script>
+```
 
 All of the above templates will generate the following HTML structure, creating the dom elements for you. The first and third methods will register the template globally while the second one wont:
 
-	<div id="mydivid">
-		<h2>Title</h2>
-		<p>Lorem Ipsum</p>
-		<p><a href="http://example.com">click here</a></p>
-	</div>
+```html
+<div id="mydivid">
+    <h2>Title</h2>
+    <p>Lorem Ipsum</p>
+    <p><a href="http://example.com">click here</a></p>
+</div>
+```
 
 To render the template and generate the dom elements:
 
-	var el = Mooml.render('mytemplate');
-	var el = template.render();
+```javascript
+var el = Mooml.render('mytemplate');
+var el = template.render();
+```
 
 Passing variables to a template can be done easily too:
 
-	Mooml.register('mytemplate', function(params) {
-		div({id: params.myDivId}
-			// more code here
-		);
-	});
-	var el = Mooml.render('mytemplate', { myDivId: 'newid' });
+```javascript
+Mooml.register('mytemplate', function(params) {
+    div({id: params.myDivId}
+        // more code here
+    );
+});
+var el = Mooml.render('mytemplate', { myDivId: 'newid' });
+```
 
 DOM defined templates have the default parameters data & index, so it's equivalent to:
 
-	Mooml.register('mytemplate', function(data, index) {
-		// template code
-	});
-
+```javascript
+Mooml.register('mytemplate', function(data, index) {
+    // template code
+});
+```
 
 Rendering template arrays
 -----------------
@@ -81,31 +94,35 @@ Rendering template arrays
 Mooml allows rendering template arrays. This is, if we pass an array of data to the render function, it will render the template N times.
 This is very useful when rendering list elements, table rows, or any other repetitive html layout:
 
-	var elements = Mooml.render('mytemplate', [
-		{ myDivId: 'div1' },
-		{ myDivId: 'div2' },
-		{ myDivId: 'div3' }
-	]);
+```javascript
+var elements = Mooml.render('mytemplate', [
+    { myDivId: 'div1' },
+    { myDivId: 'div2' },
+    { myDivId: 'div3' }
+]);
+```
 
 Will generate:
 
-	<div id="div1"></div>
-	<div id="div2"></div>
-	<div id="div3"></div>
-
+```html
+<div id="div1"></div>
+<div id="div2"></div>
+<div id="div3"></div>
+```
 
 Evaluating templates on the fly
 -----------------
 
 Evaluating templates on the fly can be done by creating a template with the Mooml.Template constructor, although the evaluate step is redundant since the template it self contains a render function:
 
-	var template = new Mooml.Template('mytemplate', function() {
-		div('Template on the fly');
-	});
-	// Both of these calls return the same result:
-	Mooml.evaluate(template); // returns <div>Template on the fly</div>
-	template.render(); // returns <div>Template on the fly</div>
-
+```javascript
+var template = new Mooml.Template('mytemplate', function() {
+    div('Template on the fly');
+});
+// Both of these calls return the same result:
+Mooml.evaluate(template); // returns <div>Template on the fly</div>
+template.render(); // returns <div>Template on the fly</div>
+```
 
 Globalizing Mooml
 -----------------
@@ -115,19 +132,23 @@ This will make all Mooml engine template tag functions available at the window s
 
 With mooml-globalize.js we can do this:
 
-	var mydiv = div(options); // Same options as Mootools new Element()
+```javascript
+var mydiv = div(options); // Same options as Mootools new Element()
+```
 
 Mooml globalized functions can also have nested elements, which makes very easy to create dom elements:
 
-	var mydiv = div(options, 
-		p('First paragraph'),
-		p('Second paragraph'),
-		div('Nested div:',
-			span('div content')
-		),
-		Mooml.render('nested_template'),
-		'Some <b>inline</b> <em>html</em> too'
-	);
+```javascript
+var mydiv = div(options, 
+    p('First paragraph'),
+    p('Second paragraph'),
+    div('Nested div:',
+        span('div content')
+    ),
+    Mooml.render('nested_template'),
+    'Some <b>inline</b> <em>html</em> too'
+);
+```
 
 Please be aware that using Mooml globalized feature will pollute the window object scope, overriding any methods with the same name and/or possibly conflicting with other javascript libraries.
 
@@ -137,19 +158,22 @@ Do not want to globalize? Still can run Mooml inline
 
 Mooml can be used directly inline to create dom elements:
 
-	var mydiv = Mooml.engine.tags.div({id:'mydiv'}, 'Inline div');
+```javascript
+var mydiv = Mooml.engine.tags.div({id:'mydiv'}, 'Inline div');
+```
 
 Better yet, you can build elements with children like this:
 
-	var el;
-	with (Mooml.engine.tags) {
-		el = div({id:'mydiv',
-			p('one paragraph'),
-			p('another paragraph'),
-			input({name:'email', type:'text', defaultValue:'test@example.com'})
-		);
-	}
-
+```javascript
+var el;
+with (Mooml.engine.tags) {
+    el = div({id:'mydiv',
+        p('one paragraph'),
+        p('another paragraph'),
+        input({name:'email', type:'text', defaultValue:'test@example.com'})
+    );
+}
+```
 
 Differences between Mooml and Jaml
 -----------------
