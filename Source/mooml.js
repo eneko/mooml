@@ -233,6 +233,10 @@ Mooml.Templates = new Class({
      * @param {Object} bind Optional Changes the scope of "this" within the target template to refer to the bind parameter.
      */
     renderTemplate: function(name, data, bind) {
+        if (typeOf(name) === 'array')
+          return name.map(function(part) {
+            return this.renderTemplate(part, data, bind)
+          }.bind(this));
         var template = this.templates[name];
         return (template)? template.render(data, [bind, this].pick()) : null;
     }
